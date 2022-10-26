@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <script src="https://cdn.socket.io/4.5.0/socket.io.min.js" 
+        integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" 
+        crossorigin="anonymous">
+        </script>
+        <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+        integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+
+        <style>
+            @font-face {
+            font-family: 'SUIT-Regular';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            }
+            /* 전체 */
+            body {
+                font-size: 14px;
+                font-family: 'SUIT-Regular';
+            }
+            /* 채팅 배경 */
+            .background {
+                background-color: white;
+                width: 400px;
+                height: 590px;
+                border-radius: 25px;
+                border: 1px solid #C4C4C4;
+            }
+            /* 채팅창 */
+            .chat-list {
+                height: 540px;
+                overflow-y: scroll;
+                overflow-x: hidden;
+                margin-top: 10px;
+                margin-right: 5px;
+            }
+            /* 채팅 스크롤 */
+            .chat-list::-webkit-scrollbar {
+                width: 14px;
+                margin-top: 10px;
+                background-color: #f0f0f0;
+                border-radius: 10px;
+            }
+            .chat-list::-webkit-scrollbar-thumb {
+                width: 13px;
+                margin-top: 10px;
+                background-color: #bcbcbc;
+                border-radius: 10px;
+            }
+            /* 채팅버튼 */
+            .chat-button {
+                width: 100%;
+                padding: 5px 0px;
+                text-align: center;
+            }
+            /* 전송버튼 */
+            #send {
+                background-color: #3a82ff;
+                border: 0px;
+                color: white;
+                box-sizing: border-box;
+                border-radius: 20px;
+                padding: 5px 9px;
+            }
+
+            /* 셀렉트박스 css */
+            #dm{
+                border: 1px solid #C4C4C4;
+                box-sizing: border-box;
+                border-radius: 20px;
+                padding: 5px 9px;
+            }
+            
+            #msg {
+                border: 1px solid #a7a7a7;
+                border-radius: 20px;
+                display: inline-block;
+                width: 250px;
+                margin: 0px 5px;
+                height: 25px;
+            }
+            #msg-who {
+                display: inline-block;
+            }
+            #form-who {
+                display: inline-block;
+            }
+            /* 각각 채팅들 */
+            .my-chat{
+                text-align: right;
+            }
+            .other-chat {
+                text-align: left
+            }
+            .day-chat {
+                text-align: center;
+                padding: 5px;
+            }
+            .day-chat > div {
+                display: inline-block;
+                background-color: rgba(0, 0, 0, 0.2);
+                padding: 5px 23px;
+                border-radius: 10px;
+                color: white;
+            }
+            .notice-chat {
+                text-align: center;
+                font-size: 13px;
+                color: #3c3c3c;
+                padding: 7px;
+            }
+            .my-chat > .chat-msg {
+                display: inline-block;
+                background-color: #fef9bf;
+                border-radius: 10px;
+                padding: 5px 10px;
+                margin: 5px 10px;
+            }
+            .my-chat > .chat-nick {
+                border-radius: 10px;
+                padding: 5px 10px;
+                margin: 5px 10px;
+            }
+
+            .other-chat > .chat-msg {
+                display: inline-block;
+                background-color: gray;
+                border-radius: 10px;
+                padding: 5px 10px;
+                margin: 5px 10px;
+            }
+            .other-chat > .chat-nick {
+                border-radius: 10px;
+                padding: 5px 10px;
+                margin: 5px 10px;
+            }
+
+            /* 로그인창 */
+            .name {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 350px;
+                height: 350px;
+                text-align: center;
+                line-height: 100%;
+                border: 1px solid #C4C4C4;
+                border-radius: 20px;
+            }
+            .name > h1 {
+                padding-top: 20%;
+            }
+            .name > input {
+                border: 0px;
+                background-color: #e7e7e7;
+                border-radius: 8px;
+                height: 29px;
+            }
+            .name > button {
+                margin-top: 20%;
+                border: 0px;
+                background-color: #3a82ff;
+                color: white;
+                padding: 6px 15px;
+                border-radius: 8px;
+                cursor: pointer;
+            }
+            .d-none {
+                display: none;
+            } 
+            
+        </style>
+    </head>
+
+    <body>
+
+        <div class="name">
+            <h1>LOGIN</h1>
+            <input type="text" id="nickName">
+            <button type="button" onclick="entry();">로그인</button>
+        </div>
+
+        <div class="background d-none">
+            <div class="chat-list">
+                <!-- <div class="day-chat"><div>2022년 09월 15일</div></div>
+                <div class="notice-chat"><div>~~~~님이 입장하셨습니다.</div></div>
+                <div class="${className}">
+                    <div class="other-msg">
+                        ${data.msg}
+                    </div>
+                    <div class="other-nick">
+                        ${data.myNic}
+                    </div>
+                </div>
+                <div class="my-chat"><div>16:40</div><div class="my-chat-text">안녕?</div></div>
+                <div class="other-chat"><div class="other-chat-text">안녕하세요</div><div>16:40</div></div> -->
+            </div>
+            
+            <div class="chat-button">
+                <form id="form-who">
+                <select id="dm">
+                    <option value="all">전체</option>
+                </select>
+                </form>
+                <input id="msg"><button onclick="send();" id="send">전송</button>
+            </div>
+        </div>
+
+    <script>
+        var socket = io.connect();
+
+        function entry() {
+            var nick = $("#nickName").val();
+            socket.emit( "setNick" , nick );
+        }
+
+        // socket.on("notice", (data)=>{
+        //     $(".chat-list").append(`<div class="notice-chat"><div>${data}</div></div>`);
+        // });
+
+        socket.on("dayChat",( )=>{
+            $(".chat-list").append(`<div class="day-chat"><div>2022년 09월 15일</div></div>`);
+        });
+
+        function send(){  
+            var msg = $("#msg").val();
+
+            var data = {
+                dm: $("#dm").val(),
+                msg: msg,
+                myNic:  $("#nickName").val()
+            }
+            socket.emit("sendMsg", data);
+        }
+        function socketEvent(){
+            //id가 입장하면
+            socket.on("notice",(id)=>{
+                $(".chat-list").append(`<div class="notice-chat">${id}님이 입장했습니다.</div>`);
+            });
+            //메세지를 보내면
+            socket.on("send",( data )=>{  //클라이언트는 무조건 socket
+                var myMsg = $("#msg").val();
+                var className = "";
+                if( myMsg == data.msg ) className = "my-chat";
+                else className = "other-chat";
+            
+                $(".chat-list").append(`<div class="${className}"><div class="chat-nick">${data.myNic}</div><div class="chat-msg">${data.msg}</div></div>`);
+            });
+            //클라이언트업데이트를 받으면
+            socket.on("clientUpdate", (client)=>{
+                var option = `<option value="all">전체</option>`;
+                for(var key in client){ //키는 그냥 임의의 변수고, 클라이언트의 개수만큼 돌게 한다는 뜻
+                    if(client[key] != $("#nickName").val()){
+                        option += `<option value="${key}">${client[key]}</option>`
+                    }
+                }
+                $("#dm").html( option );
+            })
+        }
+
+        socket.on( "err" , (msg)=>{
+            alert(msg);
+        });
+
+        socket.on("entrySuccess" , ()=>{
+            $(".background").removeClass("d-none");
+            $(".name").addClass("d-none");
+            socketEvent();
+        });
+
+    </script>
+    
+    </body>
+
+</html>
