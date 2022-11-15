@@ -179,7 +179,7 @@
 
         <div class="name">
             <h1>LOGIN</h1>
-            <input type="text" id="nickName">
+            <input type="text" id="nickName" onkeyup="enterkey();">
             <button type="button" onclick="entry();">로그인</button>
         </div>
 
@@ -205,7 +205,7 @@
                     <option value="all">전체</option>
                 </select>
                 </form>
-                <input id="msg"><button onclick="send();" id="send">전송</button>
+                <input id="msg" onkeyup="msgenter();"><button onclick="send();" id="send">전송</button>
             </div>
         </div>
 
@@ -270,6 +270,17 @@
             $(".name").addClass("d-none");
             socketEvent();
         });
+
+        function enterkey() {
+            if (window.event.keyCode == 13){
+                entry();
+            }
+        }
+        function msgenter() {
+            if(window.event.keyCode == 13){
+                send();
+            }
+        }
 
     </script>
     
